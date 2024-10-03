@@ -1,9 +1,9 @@
 // models.rs
 
 use serde::Deserialize;
+use serde::Serialize;
 
-
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize,Serialize,Debug)]
 pub struct BlockchainInfo {
     pub automatic_pruning: bool,
     pub bestblockhash: String,
