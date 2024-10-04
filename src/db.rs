@@ -63,6 +63,7 @@ impl Database {
 
     // 获取数据库连接的方法
     pub fn get_conn(&self) -> Result<PooledConn, mysql::Error> {
+        println!("Successfully get_conn");
         self.pool.get_conn()
     }
 

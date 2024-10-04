@@ -1,3 +1,4 @@
+use std::io;
 // errors.rs
 use thiserror::Error;
 
@@ -14,4 +15,7 @@ pub enum AppError {
 
     #[error("Configuration error: {0}")]
     Config(String),
+
+    #[error("IO error: {0}")]
+    Io(#[from] io::Error),  // 添加这行来实现 From<io::Error> 的自动转换
 }
