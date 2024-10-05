@@ -19,3 +19,4 @@ env_logger = "0.9"  # 或最新版本
 actix-web = "4"
 actix = "0.13"
 futures-util = "0.3.30"  # 用于处理异步流
+actix-cors = "0.6"

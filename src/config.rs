@@ -1,4 +1,5 @@
 // config.rs
+#[derive(Clone, Debug)]  // 为 Config 结构体派生 Clone 和 Debug trait
 pub struct Config {
     pub db_connection_string: String,
     pub rpc_url: String,
