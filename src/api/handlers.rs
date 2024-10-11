@@ -23,7 +23,7 @@ pub async fn get_blockchain_info(database: web::Data<Database>) -> impl Responde
                     automatic_pruning, bestblockhash, blocks, chain, chainwork,
                     difficulty, headers, initialblockdownload, mediantime, prune_target_size,
                     pruned, pruneheight, size_on_disk, time, verificationprogress, warnings
-                  FROM Blocks
+                  FROM blockchaininfo
                   ORDER BY time DESC
                   LIMIT 1";
 

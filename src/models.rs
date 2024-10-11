@@ -22,3 +22,24 @@ pub struct BlockchainInfo {
     pub verificationprogress: f64,
     pub warnings: String,
 }
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct BlockInfo {
+    pub hash: String,
+    pub confirmations: u64,
+    pub size: u64,
+    pub height: u64,
+    pub version: u64,
+    pub version_hex: Option<String>,  // 修改为可选字段
+    pub merkleroot: String,
+    pub time: u64,
+    pub mediantime: u64,
+    pub nonce: u64,
+    pub bits: String,
+    pub difficulty: f64,
+    pub chainwork: String,
+    pub n_tx: Option<u64>,
+    pub previousblockhash: Option<String>,
+    pub nextblockhash: Option<String>,
+}
+

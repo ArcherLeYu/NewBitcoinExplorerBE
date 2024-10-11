@@ -46,8 +46,22 @@ async fn main() -> Result<(), AppError> {
                     if !hash_exists {
                         // 如果不存在，插入新的区块信息
                         println!("新区块链hash {:?}", blockchain_info.bestblockhash);
-                        if let Err(e) = database.insert_block_info(&blockchain_info) {
+                        if let Err(e) = database.insert_blockchain_info(&blockchain_info) {
                             eprintln!("Failed to insert block info: {:?}", e);
+                        }
+
+                        // Fetch the detailed block information using the new block hash
+                        match rpc_client::get_block(&config_clone, &blockchain_info.bestblockhash).await {
+                            Ok(block_info) => {
+                                println!("Fetched block info: {:?}", block_info);
+                                // 尝试将获取的区块详细信息插入数据库
+                                if let Err(e) = database.insert_blockinfo(&block_info) {
+                                    eprintln!("Failed to insert block details: {:?}", e);
+                                }
+                            },
+                            Err(e) => {
+                                eprintln!("Failed to fetch block info: {:?}", e);
+                            }
                         }
                     } else {
                         // 如果存在，可以选择打印信息或执行其他逻辑
