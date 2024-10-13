@@ -63,8 +63,16 @@ impl Database {
 
     // 获取数据库连接的方法
     pub fn get_conn(&self) -> Result<PooledConn, mysql::Error> {
-        println!("Successfully get_conn");
-        self.pool.get_conn()
+        match self.pool.get_conn() {
+            Ok(conn) => {
+                log::info!("Successfully established a database connection");
+                Ok(conn)
+            }
+            Err(e) => {
+                log::error!("Failed to establish a database connection: {:?}", e);
+                Err(e)
+            }
+        }
     }
 
     pub fn insert_blockinfo(&self, block_info: &BlockInfo) -> Result<(), AppError> {

@@ -5,6 +5,8 @@ mod models;
 mod utils;
 mod errors;
 mod api;
+mod price_fetcher;
+mod volume_fetcher;
 
 use env_logger;
 use actix_web::{web, App, HttpServer}; // 导入 Actix 组件
@@ -26,10 +28,10 @@ async fn main() -> Result<(), AppError> {
     // 直接创建数据库连接池实例并在每个循环中使用它
     let config_clone = config.clone();  // 克隆配置以供异步任务使用
     tokio::spawn(async move {
-        let mut interval = time::interval(Duration::from_secs(600)); // 每600秒（10分钟）运行一次
+        let mut interval = time::interval(Duration::from_secs(60)); // 每600秒（10分钟）运行一次
 
         loop {
-            interval.tick().await; // 每隔10分钟触发一次
+            interval.tick().await; //
             match rpc_client::get_blockchain_info(&config_clone).await {
                 Ok(blockchain_info) => {
                     // 创建一个新的数据库连接池
@@ -53,7 +55,7 @@ async fn main() -> Result<(), AppError> {
                         // Fetch the detailed block information using the new block hash
                         match rpc_client::get_block(&config_clone, &blockchain_info.bestblockhash).await {
                             Ok(block_info) => {
-                                println!("Fetched block info: {:?}", block_info);
+                                //println!("Fetched block info: {:?}", block_info);
                                 // 尝试将获取的区块详细信息插入数据库
                                 if let Err(e) = database.insert_blockinfo(&block_info) {
                                     eprintln!("Failed to insert block details: {:?}", e);
@@ -75,7 +77,22 @@ async fn main() -> Result<(), AppError> {
         }
     });
 
-    // 任务 2：提供 HTTP API 服务器，供前端获取最新的 blockchain 信息
+    // 任务 2：实时获取 Bitcoin 价格
+    tokio::spawn(async {
+        if let Err(e) = price_fetcher::fetch_bitcoin_price().await {
+            eprintln!("Error fetching bitcoin price: {:?}", e);
+        }
+    });
+
+    // 任务 3：实时获取 Bitcoin 交易量
+    tokio::spawn(async {
+        if let Err(e) = volume_fetcher::fetch_bitcoin_volume().await {
+            eprintln!("Error fetching bitcoin volume: {:?}", e);
+        }
+    });
+
+
+    // 提供 HTTP API 服务器，供前端获取最新的 blockchain 信息
     let database = db::Database::new(&config.db_connection_string)?;
     let database_data = web::Data::new(database);
 
