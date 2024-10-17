@@ -2,9 +2,9 @@
 use mysql::*;
 use mysql::prelude::*;
 use crate::errors::AppError;  // 确保引入了自定义错误类型
-use crate::models::{BlockInfo, BlockchainInfo}; // 确保引入了 BlockchainInfo
+use crate::models::{BlockInfo, BlockSummary, BlockchainInfo}; // 确保引入了 BlockchainInfo
 
-
+#[derive(Clone)]
 pub struct Database {
     pool: Pool,
 }
@@ -109,6 +109,86 @@ impl Database {
         }
     }
 
+    // 添加价格到数据库
+    pub fn insert_bitcoin_price(&self, price: f64) -> Result<(), AppError> {
+        let mut conn = self.pool.get_conn().map_err(AppError::Database)?;
+        let result = conn.exec_drop(
+            "INSERT INTO bitcoin_prices (price, timestamp) VALUES (:price, CURRENT_TIMESTAMP)",
+            params! {
+                "price" => price,
+            },
+        );
+        match result {
+            Ok(_) => Ok(()),
+            Err(e) => {
+                eprintln!("Failed to insert bitcoin price: {}", e);
+                Err(AppError::Database(e))
+            }
+        }
+    }
 
+    // 添加交易量到数据库
+    pub fn insert_bitcoin_volume(&self, volume: f64) -> Result<(), AppError> {
+        let mut conn = self.pool.get_conn().map_err(AppError::Database)?;
+        let result = conn.exec_drop(
+            "INSERT INTO bitcoin_volumes (volume, timestamp) VALUES (:volume, CURRENT_TIMESTAMP)",
+            params! {
+                "volume" => volume,
+            },
+        );
+        match result {
+            Ok(_) => Ok(()),
+            Err(e) => {
+                eprintln!("Failed to insert bitcoin volume: {}", e);
+                Err(AppError::Database(e))
+            }
+        }
+    }
+
+    // 获取最新的价格信息
+    pub fn get_latest_price(&self) -> Result<Option<f64>, AppError> {
+        let mut conn = self.pool.get_conn()?;
+        match conn.exec_first::<f64, _, _>(
+            "SELECT price FROM bitcoin_prices ORDER BY id DESC LIMIT 1",
+            (),
+        ) {
+            Ok(result) => {
+                log::info!("Successfully fetched latest price: {:?}", result);
+                Ok(result)
+            },
+            Err(e) => {
+                log::error!("Failed to fetch latest price: {:?}", e);
+                Err(AppError::Database(e))
+            }
+        }
+    }
+
+    // 获取最新的交易量信息
+    pub fn get_latest_volume(&self) -> Result<Option<f64>, AppError> {
+        let mut conn = self.pool.get_conn()?;
+        match conn.exec_first::<f64, _, _>(
+            "SELECT volume FROM bitcoin_volumes ORDER BY id DESC LIMIT 1",
+            (),
+        ) {
+            Ok(result) => {
+                log::info!("Successfully fetched latest volume: {:?}", result);
+                Ok(result)
+            },
+            Err(e) => {
+                log::error!("Failed to fetch latest volume: {:?}", e);
+                Err(AppError::Database(e))
+            }
+        }
+    }
+
+    //获取数据库中block height和 hash
+    pub fn get_blocks_summary(&self) -> Result<Vec<BlockSummary>, AppError> {
+        let mut conn = self.pool.get_conn().map_err(AppError::Database)?;
+        let blocks = conn.query_map(
+            "SELECT height, hash FROM blockinfo ORDER BY height DESC",
+            |(height, hash)| BlockSummary { height, hash },
+        ).map_err(AppError::Database)?;
+        Ok(blocks)
+    }
 
 }

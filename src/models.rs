@@ -1,5 +1,4 @@
 // models.rs
-
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -41,5 +40,11 @@ pub struct BlockInfo {
     pub n_tx: Option<u64>,
     pub previousblockhash: Option<String>,
     pub nextblockhash: Option<String>,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct BlockSummary {
+    pub height: u64,
+    pub hash: String,
 }
 
