@@ -18,7 +18,7 @@ use crate::api::handlers::{get_block_detail_by_height, get_blocks_summary};
 #[actix_web::main]
 async fn main() -> Result<(), AppError> {
     // 初始化日志记录器
-    std::env::set_var("RUST_LOG", "debug");
+    std::env::set_var("RUST_LOG", "info");
     env_logger::init();
 
     // 创建配置对象
@@ -111,7 +111,7 @@ async fn main() -> Result<(), AppError> {
             .route("/block-detail/{height}", web::get().to(get_block_detail_by_height))
             .route("/blocks-summary", web::get().to(get_blocks_summary))
     })
-        .bind("127.0.0.1:8081")?
+        .bind("0.0.0.0:8081")?
         .run()
         .await?;
 
