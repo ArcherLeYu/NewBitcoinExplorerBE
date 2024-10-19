@@ -20,11 +20,11 @@ impl Database {
         Ok(Database { pool })
     }
 
-    // 添加一个函数来检查特定的 bestblockhash 是否已经存在
+    // Function to check if a specific block hash exists in the blocksummary table
     pub fn check_block_hash_exists(&self, hash: &str) -> Result<bool, AppError> {
         let mut conn = self.pool.get_conn().map_err(AppError::Database)?;
         let exists: Option<u8> = conn.exec_first(
-            "SELECT 1 FROM blockchaininfo WHERE bestblockhash = ?",
+            "SELECT 1 FROM blocksummary WHERE hash = ?",
             (hash,)
         ).map_err(AppError::Database)?;
         Ok(exists.is_some())

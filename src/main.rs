@@ -32,7 +32,7 @@ async fn main() -> Result<(), AppError> {
 
     // 任务 1：定时从 blockchain.info 获取区块链数据
     tokio::spawn(async move {
-        let mut interval = time::interval(Duration::from_secs(10)); // 每600秒（10分钟）运行一次
+        let mut interval = time::interval(Duration::from_secs(300)); // 每600秒（10分钟）运行一次
 
         loop {
             interval.tick().await;
