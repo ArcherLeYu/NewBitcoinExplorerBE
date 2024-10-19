@@ -1,10 +1,12 @@
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{get, web, HttpResponse, Responder};
 use actix_web::web::Path;
 use mysql::params;
 use mysql::prelude::*; // 导入 Queryable trait
 use crate::db::Database;
-use crate::models::{BlockInfo, BlockchainInfo};
+use crate::models::{BlockInfo, BlockchainInfo, PriceList};
 use crate::models::BlockSummary;
+use serde::Serialize;
+
 
 pub async fn get_blockchain_info(database: web::Data<Database>) -> impl Responder {
     log::info!("Received request to get blockchain info");
@@ -158,6 +160,18 @@ pub async fn get_blocks_summary(database: web::Data<Database>) -> impl Responder
         Err(e) => {
             log::error!("Failed to fetch blocks summary: {:?}", e);
             HttpResponse::InternalServerError().body(format!("Failed to fetch blocks summary: {:?}", e))
+        }
+    }
+}
+
+
+pub async fn get_latest_10_prices(db: web::Data<Database>) -> impl Responder {
+    match db.get_latest_10_prices() {
+        Ok(prices) => {
+            HttpResponse::Ok().json(PriceList { prices }) // Respond with the list of prices.
+        },
+        Err(_) => {
+            HttpResponse::InternalServerError().json("Failed to fetch the latest 10 prices")
         }
     }
 }

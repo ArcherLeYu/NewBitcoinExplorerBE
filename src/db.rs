@@ -194,4 +194,19 @@ impl Database {
         Ok(blocks)
     }
 
+    // 获取最后10个price
+    pub fn get_latest_10_prices(&self) -> Result<Vec<f64>, AppError> {
+        let mut conn = self.pool.get_conn()?;
+        let result = conn.exec::<f64, _, _>(
+            "SELECT price FROM bitcoin_prices ORDER BY id DESC LIMIT 10",
+            Params::Empty,
+        );
+        match result {
+            Ok(prices) => Ok(prices),
+            Err(e) => {
+                log::error!("Failed to fetch the last 10 prices: {:?}", e);
+                Err(AppError::Database(e))
+            }
+        }
+    }
 }

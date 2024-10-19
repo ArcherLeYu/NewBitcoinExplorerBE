@@ -13,7 +13,7 @@ use tokio::time::{self, Duration};
 use api::handlers::{get_blockchain_info, get_bitcoin_price, get_bitcoin_volume}; // 导入 get_blockchain_info 函数
 use actix_cors::Cors;
 use api::{price, volume};
-use crate::api::handlers::{get_block_detail_by_height, get_blocks_summary};
+use crate::api::handlers::{get_block_detail_by_height, get_blocks_summary, get_latest_10_prices};
 
 #[actix_web::main]
 async fn main() -> Result<(), AppError> {
@@ -33,7 +33,7 @@ async fn main() -> Result<(), AppError> {
     // 直接创建数据库连接池实例并在每个循环中使用它
     let config_clone = config.clone();  // 克隆配置以供异步任务使用
     tokio::spawn(async move {
-        let mut interval = time::interval(Duration::from_secs(60)); // 每600秒（10分钟）运行一次
+        let mut interval = time::interval(Duration::from_secs(600)); // 每600秒（10分钟）运行一次
 
         loop {
             interval.tick().await; //
@@ -110,6 +110,7 @@ async fn main() -> Result<(), AppError> {
             .route("/latest-volume", web::get().to(get_bitcoin_volume))
             .route("/block-detail/{height}", web::get().to(get_block_detail_by_height))
             .route("/blocks-summary", web::get().to(get_blocks_summary))
+            .route("/latest-10-prices", web::get().to(get_latest_10_prices)) // Register this route
     })
         .bind("0.0.0.0:8081")?
         .run()

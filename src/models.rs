@@ -48,3 +48,8 @@ pub struct BlockSummary {
     pub hash: String,
 }
 
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct PriceList {
+    pub prices: Vec<f64>,
+}

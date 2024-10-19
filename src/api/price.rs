@@ -28,6 +28,6 @@ pub async fn fetch_bitcoin_price(db: Database) -> Result<(), Error> {
         }
 
         // 延迟下一次请求
-        time::sleep(Duration::from_secs(60)).await;
+        time::sleep(Duration::from_secs(600)).await;
     }
 }
